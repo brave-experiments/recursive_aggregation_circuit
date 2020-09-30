@@ -1,5 +1,10 @@
 #![allow(dead_code)]
 
+extern crate reqwest;
+
+use std::io;
+use std::fs::File;
+
 use franklin_crypto::bellman::pairing::ff::*;
 use franklin_crypto::bellman::pairing::*;
 use franklin_crypto::bellman::plonk::better_better_cs::cs::*;
@@ -1301,9 +1306,27 @@ mod test {
         (verification_key, proof)
     }
 
+    fn check_if_crs_exists_and_download(n: usize) {
+        let file_path = &format!("setup_2^{}.key", n);
+        let file_exists = std::path::Path::new(file_path).exists();
+    
+        if !file_exists {
+            println!("CRS not found  .. downloading CRS from https://universal-setup.ams3.digitaloceanspaces.com/ ");
+            let download_link = &format!("https://universal-setup.ams3.digitaloceanspaces.com/setup_2^{}.key", n);
+            let crs_file_destination = &format!("src/circuit/setup2^{}.key",n);
+            let mut resp = reqwest::get(download_link).expect("Unable to download CRS");
+            let mut out = File::create(crs_file_destination).expect("failed to create file");
+            io::copy(&mut resp, &mut out).expect("failed to copy content");
+        } else {
+            println!("CRS found .. moving on!");
+        }
+    }
+
     fn open_crs_for_log2_of_size(n: usize) -> Crs::<Bn256, CrsForMonomialForm> {
-        let base_path = std::path::Path::new("/Users/alexvlasov/Downloads/setup/processed");
-        let full_path = base_path.join(&format!("setup_2^{}.key", n));
+        // let base_path = std::path::Path::new("/Users/alexvlasov/Downloads/setup/processed");
+        check_if_crs_exists_and_download(n);
+        let crs_file_name = &format!("setup_2^{}.key", n);
+        let full_path = std::path::Path::new(crs_file_name);
         println!("Opening {}", full_path.to_string_lossy());
         let file = std::fs::File::open(full_path).unwrap();
         let reader = std::io::BufReader::with_capacity(1 << 24, file);

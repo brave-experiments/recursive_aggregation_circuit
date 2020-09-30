@@ -8,7 +8,8 @@ edition = "2018"
 
 [dependencies]
 # franklin-crypto = {path = "../franklin-crypto", features = ["multicore"]}
-franklin-crypto = {git = "https://github.com/matter-labs/franklin-crypto", branch = "plonk_gadgets", features = ["multicore"]}
+franklin-crypto = {git = "https://github.com/brave-experiments/franklin-crypto", branch = "mathru_patch", features = ["multicore"]}
 sha2 = "0.9"
 hex = "*"
 once_cell = "*"
+reqwest = "0.9.4"
